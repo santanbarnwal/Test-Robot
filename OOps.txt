@@ -1,0 +1,120 @@
+# Importing libraries
+import pygame
+import sys
+
+pygame.init()
+
+# Define the Robot class
+class Robot:
+    def __init__(self, x, y, image_path, grid_size, screen):
+        #Robot's initial position
+        self.x = x
+        self.y = y
+        self.grid_size = grid_size
+        self.screen = screen
+       
+        #Robot image
+        self.robot_image = pygame.image.load(image_path)
+        self.robot_image = pygame.transform.scale(self.robot_image, (grid_size, grid_size))
+       
+        self.key_pressed = ""
+       
+        #Font and Size
+        self.font = pygame.font.SysFont("Arial", 20)
+   
+    #Method to move the robot on button clicks
+    def move(self, key):
+        if key == pygame.K_n:  # Move North
+            self.key_pressed = "N"
+            self.y -= self.grid_size
+        elif key == pygame.K_s:  # Move South
+            self.key_pressed = "S"
+            self.y += self.grid_size
+        elif key == pygame.K_e:  # Move East
+            self.key_pressed = "E"
+            self.x += self.grid_size
+        elif key == pygame.K_w:  # Move West
+            self.key_pressed = "W"
+            self.x -= self.grid_size
+       
+        #Keep the robot within the window so check the maximum size
+        self.x = max(0, min(self.x, width - self.grid_size))
+        self.y = max(0, min(self.y, height - self.grid_size))
+   
+    # Method to draw the robot on the screen
+    def draw(self):
+        self.screen.blit(self.robot_image, (self.x, self.y))
+   
+    #    Method to display labels (direction, key pressed, and position)
+    def display_labels(self):
+        north_label = self.font.render("N", True, (150, 0, 0))
+        south_label = self.font.render("S", True, (150, 0, 0))
+        east_label = self.font.render("E", True, (0, 0, 0))
+        west_label = self.font.render("W", True, (0, 0, 0))
+       
+        self.screen.blit(north_label, (40, 30))
+        self.screen.blit(south_label, (40, 70))
+        self.screen.blit(east_label, (80, 50))
+        self.screen.blit(west_label, (10, 50))
+
+        # Display the last key pressed
+        key_label = self.font.render(f"Key Pressed: {self.key_pressed}", True, (0, 0, 0))
+        self.screen.blit(key_label, (400, 30))
+
+        # Display the robot's current position
+        position_label = self.font.render(f"Position: ({self.x//self.grid_size}, {self.y//self.grid_size})", True, (0, 0, 0))
+        self.screen.blit(position_label, (400, 70))
+
+
+# Grid and window properties
+width, height = 600, 600
+grid_size = 40
+line_color = (150, 150, 200)
+
+# Create a window
+window = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Robot Movement")
+
+# Create the Robot object, with starting position at the center of the grid
+robot = Robot(width // 2, height // 2, "robot.png", grid_size, window)
+
+# Function to draw the grid
+def draw_grid():
+    for x in range(0, width, grid_size):
+        pygame.draw.line(window, line_color, (x, 0), (x, height))
+    for y in range(0, height, grid_size):
+        pygame.draw.line(window, line_color, (0, y), (width, y))
+
+
+# Main game loop
+running = True
+while running:
+    window.fill((255, 255, 255))
+
+    # Draw the grid
+    draw_grid()
+
+    # Draw the robot
+    robot.draw()
+
+    # Display the direction, the last key pressed, and the current position
+    robot.display_labels()
+
+    # Handle key clicks
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            #print(f"Final Position: ({robot.x // grid_size}, {robot.y // grid_size})")
+           
+            #when X button is clicked, Pygame is stopped to release all resources.
+            pygame.quit()
+           
+            #Exit is to make sure Script execution ends.
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            # Move the robot when a key is pressed
+            robot.move(event.key)
+
+    pygame.display.flip()
+
+    # to manage speed
+    pygame.time.Clock().tick(10)
